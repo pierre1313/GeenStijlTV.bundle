@@ -5,6 +5,6 @@
                 "label":        "Commentaar (uit = direct afspelen)",
                 "type":         "enum",
 				"values":		["aan", "uit"],
-                "default":      "uit",
-        },
+                "default":      "uit"
+        }
 ]

@@ -1,7 +1,4 @@
 import re, string, datetime
-from PMS import *
-from PMS.Objects import *
-from PMS.Shortcuts import *
 
 ####################################################################################################
 
@@ -51,7 +48,7 @@ def Start():
   MediaContainer.art = R('art-default.jpg')
 
   # Set the default cache time
-  HTTP.SetCacheTime(CACHE_INTERVAL)
+  HTTP.CacheTime = CACHE_INTERVAL
 
 ####################################################################################################
 
@@ -108,12 +105,12 @@ def SearchPage(sender, pageUrl, query):
 ####################################################################################################
 
 def ParseHomePage(dir, url, regex):
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
 
   results = re.compile(regex, re.DOTALL + re.IGNORECASE + re.M).findall(data)
 
   for result in results:
-    if Prefs.Get('comments') == "aan":
+    if Prefs['comments'] == "aan":
       dir.Append(Function(DirectoryItem(OpenItem, title=result[2], thumb=result[4], summary=result[8]), title=result[2], thumb=result[4], summary=result[8], url=result[3]))
     else:
       dir.Append(Function(VideoItem(PlayVideo, title=result[2], thumb=result[4], summary=result[8]), url=result[3]))
@@ -123,7 +120,7 @@ def ParseHomePage(dir, url, regex):
 ####################################################################################################
 
 def ParseArchivePage(dir, url, regex):
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
 
   results = re.compile(regex, re.DOTALL + re.IGNORECASE + re.M).findall(data)
 
@@ -135,7 +132,7 @@ def ParseArchivePage(dir, url, regex):
 ####################################################################################################
 
 def ParseSearchPage(dir, url, regex):
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
   data = data.replace('<b style="color:black;background-color:#FFFF00">', "")
   data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
   data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
@@ -146,11 +143,14 @@ def ParseSearchPage(dir, url, regex):
   results = re.compile(regex, re.DOTALL + re.IGNORECASE + re.M).findall(data)
 
   for result in results:
-    if Prefs.Get('comments') == "aan":
+    if Prefs['comments'] == "aan":
       dir.Append(Function(DirectoryItem(OpenItem, title=result[1], thumb=R(PLUGIN_ICON_DEFAULT), summary=result[2]), title=result[1], thumb=R(PLUGIN_ICON_DEFAULT), summary=result[2], url=result[0]))
     else:
       dir.Append(Function(VideoItem(PlayVideo, title=result[1], thumb=R(PLUGIN_ICON_DEFAULT), summary=result[2]), url=result[0]))
 
+
+  if len(dir) == 0:
+    dir = MessageContainer('Zoeken',"geen resultaten ... ")
   return dir
 
 ####################################################################################################
@@ -159,11 +159,11 @@ def OpenArchiveMonthItem(sender, title, url):
   dir = MediaContainer(title2=title, noCache=True, art=R(PLUGIN_ARTWORK))
   dir.viewGroup = 'Details'
  
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
   results = re.compile(REGEX_ARCHIVE_ITEM, re.DOTALL + re.IGNORECASE + re.M).findall(data)
   
   for result in results:
-    if Prefs.Get('comments') == "aan":
+    if Prefs['comments'] == "aan":
       dir.Append(Function(DirectoryItem(OpenItem, title=result[2], summary=result[3], thumb=result[1]), title=result[2], summary=result[3], thumb=result[1], url=result[0]))
     else:
       dir.Append(Function(VideoItem(PlayVideo, title=result[2], thumb=result[1], summary=result[3]), url=result[0]))
@@ -188,7 +188,7 @@ def OpenItem(sender, title, summary, thumb, url):
 
 def ParseComments(dir, url, regex, thumb):
 	
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
   results = re.compile(regex, re.DOTALL + re.IGNORECASE + re.M).findall(data)
 
   dir.Append(DirectoryItem("none", title="", thumb=thumb))
@@ -233,7 +233,7 @@ def PlayVideo(sender, url):
 
 def StreamUrl(url):
   stream = ""
-  data = HTTP.Request(url).decode('latin-1')
+  data = HTTP.Request(url).content.decode('latin-1')
 
   results_video = re.compile(REGEX_STREAM1, re.DOTALL + re.IGNORECASE + re.M).findall(data)
   for result_video in results_video:
